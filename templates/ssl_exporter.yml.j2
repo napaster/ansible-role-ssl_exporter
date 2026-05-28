@@ -2,4 +2,5 @@
 {{ '# ' + ansible_managed }}
 {{ '# Do not edit manually' }}
 
-{{ ssl_exporter_settings | ansible.builtin.to_nice_yaml(indent=2) }}
+{{ lookup('ansible.builtin.vars', 'ssl_exporter_settings') |
+  ansible.builtin.to_nice_yaml(indent=2) }}

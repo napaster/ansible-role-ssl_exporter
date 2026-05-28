@@ -6,34 +6,28 @@
   ansible.builtin.include_tasks:
     file: "packages.yml"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'true'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'true'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
-    ssl_exporter_pacakges_variant:
-      "{{ hostvars[inventory_hostname]['ssl_exporter_package'] }}"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"
+    ssl_exporter_pacakges_variant: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter_package') }}"
 - name: "ssl_exporter | Include packages tasks [not package deployment]"
   ansible.builtin.include_tasks:
     file: "download.yml"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'false'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'false'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"
 - name: "ssl_exporter | Include deployment tasks"
   ansible.builtin.import_tasks:
     file: "deploy.yml"

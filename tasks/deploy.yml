@@ -3,41 +3,34 @@
     deployment]"
   ansible.builtin.template:
     src: "ssl_exporter.options.j2"
-    dest: "/etc/conf.d/ssl_exporter"
+    dest: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_options_dest') }}"
     owner: "root"
     group: "root"
     mode: "0644"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'true'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'true'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"
   notify:
     - "Restart ssl_exporter"
 - name: "ssl_exporter | Deploy ssl_exporter modules [package deployment]"
   ansible.builtin.template:
     src: "ssl_exporter.yml.j2"
-    dest: "{{ hostvars[inventory_hostname]['ssl_exporter_conf_dest'] +
-      '/ssl_exporter.yml' }}"
+    dest: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_yaml_dest') }}"
     owner: "root"
     group: "root"
     mode: "0644"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'true'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'true'"
   vars:
     ssl_exporter_install_package:
       "[] | map(&install_package || 'false', @) | [0]"
@@ -46,59 +39,52 @@
 - name: "ssl_exporter | Deploy ssl_exporter modules [not package deployment]"
   ansible.builtin.template:
     src: "ssl_exporter.yml.j2"
-    dest: "{{ hostvars[inventory_hostname]['ssl_exporter_dest'] +
+    dest: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_dest') +
       '/ssl_exporter.yml' }}"
     owner: "root"
     group: "root"
     mode: "0644"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'false'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'false'"
   vars:
     ssl_exporter_install_package:
       "[] | map(&install_package || 'false', @) | [0]"
   notify:
     - "Restart ssl_exporter"
-- name: "ssl_exporter | Deploy ssl_exporter service configuration [not package
-    deployment]"
+- name: "ssl_exporter | Deploy ssl_exporter service configuration [not
+    package deployment]"
   ansible.builtin.template:
     src: "ssl_exporter.service.j2"
-    dest: "{{ '/etc/systemd/system/' +
-      hostvars[inventory_hostname]['ssl_exporter_service'] + '.service' }}"
+    dest: "{{ '/etc/systemd/system/' + lookup('ansible.builtin.vars',
+      'ssl_exporter_service') + '.service' }}"
     owner: "root"
     group: "root"
     mode: "0644"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'false'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'false'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"
   notify:
     - "Daemon reload"
     - "Restart ssl_exporter"
 - name: "ssl_exporter | Enable ssl_exporter service"
   ansible.builtin.systemd:
-    name: "{{ hostvars[inventory_hostname]['ssl_exporter_service'] }}"
+    name: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_service') }}"
     enabled: "yes"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_enable']) is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_enable']) == 'true'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_enable', default='')) == 'true'"
   vars:
     ssl_exporter_enable: "[] | map(&enable || 'false', @) | [0]"

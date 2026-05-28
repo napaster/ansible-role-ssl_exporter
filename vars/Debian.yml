@@ -1,6 +1,8 @@
 ---
 ssl_exporter_dest: '/opt/ssl_exporter'
 ssl_exporter_conf_dest: '/etc/prometheus'
+ssl_exporter_yaml_dest: '/etc/prometheus/ssl_exporter.yml'
+ssl_exporter_options_dest: '/etc/conf.d/ssl_exporter'
 ssl_exporter_bin: '/usr/bin/ssl_exporter'
 ssl_exporter_service: 'ssl_exporter'
 ssl_exporter_package: 'ssl_exporter'

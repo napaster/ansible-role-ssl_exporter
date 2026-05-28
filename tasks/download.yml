@@ -3,17 +3,20 @@
   ansible.builtin.import_tasks:
     file: "packages.yml"
   vars:
-    ssl_exporter_pacakges_variant:
-      "{{ hostvars[inventory_hostname]['ssl_exporter_packages_deps'] }}"
+    ssl_exporter_pacakges_variant: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter_packages_deps') }}"
 - name: "ssl_exporter | Download & unarchive exporter binary from tarball"
   ansible.builtin.unarchive:
-    src: "{{ vars['ssl_exporter_url'] + '/v' + vars['ssl_exporter_version'] +
-      '/ssl_exporter_' + vars['ssl_exporter_version'] + '_' +
-      vars['ssl_exporter_arch'] + '.tar.gz' }}"
-    dest: "{{ hostvars[inventory_hostname]['ssl_exporter_dest'] }}"
+    src: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_url') + '/v' +
+      lookup('ansible.builtin.vars', 'ssl_exporter_version') +
+      '/ssl_exporter_' + lookup('ansible.builtin.vars',
+      'ssl_exporter_version') + '_' + lookup('ansible.builtin.vars',
+      'ssl_exporter_arch') + '.tar.gz' }}"
+    dest: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_dest') }}"
     remote_src: "yes"
-    include: "{{ 'ssl_exporter-' + vars['ssl_exporter_version'] + '.' +
-      vars['ssl_exporter_arch'] + '/ssl_exporter' }}"
+    include: "{{ 'ssl_exporter-' + lookup('ansible.builtin.vars',
+      'ssl_exporter_version') + '.' + lookup('ansible.builtin.vars',
+      'ssl_exporter_arch') + '/ssl_exporter' }}"
     mode: "0775"
     owner: "root"
     group: "root"

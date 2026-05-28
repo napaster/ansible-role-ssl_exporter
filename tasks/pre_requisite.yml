@@ -1,45 +1,56 @@
 ---
+- name: "ssl_exporter | Assert that ansible facts gathered successfully"
+  ansible.builtin.assert:
+    that:
+      - "hostvars[inventory_hostname]['ansible_facts']['service_mgr'] is
+        defined"
+    fail_msg: "'ansible_facts' not found. Please enable facts gathering"
+    quiet: "true"
 - name: "ssl_exporter | Assert that system manager is systemd"
   ansible.builtin.assert:
     that:
-      - "hostvars[inventory_hostname]['ansible_service_mgr'] == 'systemd'"
+      - "hostvars[inventory_hostname]['ansible_facts']['service_mgr'] ==
+        'systemd'"
     fail_msg: "System manager is not systemd"
     quiet: "true"
-- name: "ssl_exporter | Add the OS specific varibles"
+- name: "ssl_exporter | Add the OS specific variables"
   ansible.builtin.include_vars:
-    file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
+    file: "{{ hostvars[inventory_hostname]['ansible_facts']['os_family'] +
+      '.yml' }}"
 - name: "ssl_exporter | Set facts about ssl_exporter role"
   ansible.builtin.set_fact:
-    ssl_exporter_version: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
-      community.general.json_query('[].version | [0]') | default(omit) }}"
-    ssl_exporter_options: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
-      community.general.json_query('[].options | [0]') | default(omit) }}"
-    ssl_exporter_settings: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
-      community.general.json_query('[].settings[] | [0]') | default(omit) }}"
-    ssl_exporter_package_state:
-      "{{ hostvars[inventory_hostname]['ssl_exporter'] |
-      community.general.json_query('[].package_state | [0]') | default(omit) }}"
+    ssl_exporter_version: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter') | community.general.json_query('[].version | [0]') }}"
+    ssl_exporter_options: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter') | community.general.json_query('[].options | [0]') }}"
+    ssl_exporter_settings: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter') | community.general.json_query('[].settings | [0]') }}"
+    ssl_exporter_package_state: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter') |
+      community.general.json_query('[].package_state | [0]') }}"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-- name: "ssl_exporter | Assert that ssl_exporter package state in valid value"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+- name: "ssl_exporter | Assert that ssl_exporter package state in
+    valid value"
   ansible.builtin.assert:
     that:
-      - "vars['ssl_exporter_package_state'] in ['present', 'latest']"
+      - "lookup('ansible.builtin.vars', 'ssl_exporter_package_state') in
+        ['present', 'latest']"
     fail_msg: "{{ 'package_state must be in `present` or `latest`,
-      current is: ' + vars['ssl_exporter_package_state'] }}"
+      current is: ' + lookup('ansible.builtin.vars',
+      'ssl_exporter_package_state') }}"
     quiet: "true"
   when:
-    - "vars['ssl_exporter_package_state'] is defined"
-    - "vars['ssl_exporter_package_state'] not in ['', [], None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter_package_state',
+      default='') not in ['', [], '[]', None, 'present', 'latest']"
 - name: "ssl_exporter | Set package state to 'present' cause value is not
     defined"
   ansible.builtin.set_fact:
     ssl_exporter_package_state: "present"
   when:
-    - "vars['ssl_exporter_package_state'] is defined"
-    - "(vars['ssl_exporter_package_state'] == '' or
-      vars['ssl_exporter_package_state'] == None)"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter_package_state',
+      default='') in ['', [], '[]', None]"
 - name: "ssl_exporter | Get last release version from Github"
   community.general.github_release:
     user: "ribbybibby"
@@ -49,61 +60,55 @@
   register: "ssl_exporter_version_tag"
   delegate_to: "localhost"
   when:
-    - "vars['ssl_exporter_version'] is defined"
-    - "vars['ssl_exporter_version'] == 'latest'"
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'false'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter_version',
+      default='') == 'latest'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'false'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"
 - name: "ssl_exporter | Set facts about ssl_exporter role"
   ansible.builtin.set_fact:
     ssl_exporter_package_state: "present"
-    ssl_exporter_version: "{{ vars['ssl_exporter_version_tag']['tag'][1:] }}"
+    ssl_exporter_version: "{{ lookup('ansible.builtin.vars',
+      'ssl_exporter_version_tag')['tag'][1:] }}"
   when:
-    - "vars['ssl_exporter_version_tag'] is defined"
-    - "not vars['ssl_exporter_version_tag']['skipped']"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter_version_tag',
+      default='') not in ['', [], '[]', None]"
+    - "not lookup('ansible.builtin.vars',
+      'ssl_exporter_version_tag')['skipped']"
 - name: "ssl_exporter | Create ssl_exporter catalog [package deployment]"
   ansible.builtin.file:
-    path: "{{ hostvars[inventory_hostname]['ssl_exporter_conf_dest'] }}"
+    path: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_conf_dest') }}"
     state: "directory"
     owner: "root"
     group: "root"
     mode: "0755"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'false'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'false'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"
 - name: "ssl_exporter | Create ssl_exporter catalog [not package deployment]"
   ansible.builtin.file:
-    path: "{{ hostvars[inventory_hostname]['ssl_exporter_dest'] }}"
+    path: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_dest') }}"
     state: "directory"
     owner: "root"
     group: "root"
     mode: "0755"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_install_package'])
-       == 'false'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_install_package', default='')) == 'false'"
   vars:
-    ssl_exporter_install_package:
-      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_install_package: "[] |
+      map(&install_package || 'false', @) | [0]"

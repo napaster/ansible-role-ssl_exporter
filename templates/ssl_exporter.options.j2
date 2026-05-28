@@ -2,19 +2,22 @@
 {{ '# ' + ansible_managed }}
 {{ '# Do not edit manually' }}
 
-{% if vars['ssl_exporter_options'] is defined and
-  vars['ssl_exporter_options'] != '' %}
-{% for s in vars['ssl_exporter_options'] %}
+{% if lookup('ansible.builtin.vars', 'ssl_exporter_options', default='')
+  not in ['', [], '[]', None] %}
+{% for s in lookup('ansible.builtin.vars', 'ssl_exporter_options') %}
 {% if loop['first'] %}
 {{ 'OPTIONS=\"' -}}
 {% endif %}
-{% if s['web_listen_address'] is defined and s['web_listen_address'] != '' %}
+{% if s['web_listen_address'] is defined and s['web_listen_address']
+  not in ['', [], '[]', None] %}
 {{ ' --web.listen-address=' + s['web_listen_address'] -}}
 {% endif %}
-{% if s['web_metrics_path'] is defined and s['web_metrics_path'] != '' %}
+{% if s['web_metrics_path'] is defined and s['web_metrics_path']
+  not in ['', [], '[]', None] %}
 {{ ' --web.metrics-path=' + s['web_metrics_path'] -}}
 {% endif %}
-{% if s['web_probe_path'] is defined and s['web_probe_path'] != '' %}
+{% if s['web_probe_path'] is defined and s['web_probe_path']
+  not in ['', [], '[]', None] %}
 {{ ' --web.probe-path=' + s['web_probe_path'] -}}
 {% endif %}
 {% if s['log_level'] is defined and s['log_level'] in ['debug', 'info', 'warn',
@@ -29,5 +32,5 @@
 {% endif %}
 {% endfor %}
 {% else %}
-{{ 'OPTIONS=""' }}
+{{ 'OPTIONS=\"\"' }}
 {% endif %}

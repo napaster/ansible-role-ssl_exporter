@@ -1,19 +1,18 @@
 ---
-- name: "Daemon reload"
+- name: "ssl_exporter | Reload systemd daemons"
   ansible.builtin.systemd:
     daemon_reload: "yes"
-- name: "Restart ssl_exporter"
+  listen: "Daemon reload"
+- name: "ssl_exporter | Restart ssl_exporter service"
   ansible.builtin.systemd:
-    name: "{{ hostvars[inventory_hostname]['ssl_exporter_service'] }}"
+    name: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_service') }}"
     state: "restarted"
+  listen: "Restart ssl_exporter"
   when:
-    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_restart']) is
-       defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_restart']) ==
-       'true'"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter', default='')
+      not in ['', [], '[]', None]"
+    - "lookup('ansible.builtin.vars', 'ssl_exporter') |
+       community.general.json_query(lookup('ansible.builtin.vars',
+      'ssl_exporter_restart', default='')) == 'true'"
   vars:
     ssl_exporter_restart: "[] | map(&restart || 'false', @) | [0]"
