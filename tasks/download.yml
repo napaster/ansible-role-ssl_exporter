@@ -14,13 +14,9 @@
       'ssl_exporter_arch') + '.tar.gz' }}"
     dest: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_dest') }}"
     remote_src: "yes"
-<<<<<<< Updated upstream
     include: "{{ 'ssl_exporter-' + lookup('ansible.builtin.vars',
       'ssl_exporter_version') + '.' + lookup('ansible.builtin.vars',
       'ssl_exporter_arch') + '/ssl_exporter' }}"
-=======
-    include: "ssl_exporter"
->>>>>>> Stashed changes
     mode: "0775"
     owner: "root"
     group: "root"
