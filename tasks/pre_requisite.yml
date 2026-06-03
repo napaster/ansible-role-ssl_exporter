@@ -76,15 +76,10 @@
     ssl_exporter_version: "{{ lookup('ansible.builtin.vars',
       'ssl_exporter_version_tag')['tag'][1:] }}"
   when:
-<<<<<<< Updated upstream
     - "lookup('ansible.builtin.vars', 'ssl_exporter_version_tag',
       default='') not in ['', [], '[]', None]"
     - "not lookup('ansible.builtin.vars',
       'ssl_exporter_version_tag')['skipped']"
-=======
-    - "vars['ssl_exporter_version_tag'] is defined"
-    - "not vars['ssl_exporter_version_tag'].get('skipped', false)"
->>>>>>> Stashed changes
 - name: "ssl_exporter | Create ssl_exporter catalog [package deployment]"
   ansible.builtin.file:
     path: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_conf_dest') }}"
