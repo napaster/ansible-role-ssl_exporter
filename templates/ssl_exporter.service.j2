@@ -24,7 +24,7 @@
 {{ 'ExecReload=/bin/kill -HUP $MAINPID' }}
 {{ 'ExecStart=' + lookup('ansible.builtin.vars', 'ssl_exporter_dest') +
   '/ssl_exporter --config.file=' + lookup('ansible.builtin.vars',
-  'ssl_exporter_dest') + '/ssl_exporter.yaml' -}}
+  'ssl_exporter_dest') + '/ssl_exporter.yml' -}}
 {% if lookup('ansible.builtin.vars', 'ssl_exporter_options', default='')
   not in ['', [], '[]', None] %}
 {% for s in vars['ssl_exporter_options'] %}

@@ -14,9 +14,7 @@
       'ssl_exporter_arch') + '.tar.gz' }}"
     dest: "{{ lookup('ansible.builtin.vars', 'ssl_exporter_dest') }}"
     remote_src: "yes"
-    include: "{{ 'ssl_exporter-' + lookup('ansible.builtin.vars',
-      'ssl_exporter_version') + '.' + lookup('ansible.builtin.vars',
-      'ssl_exporter_arch') + '/ssl_exporter' }}"
+    include: "ssl_exporter"
     mode: "0775"
     owner: "root"
     group: "root"
