@@ -21,12 +21,20 @@
 {{ 'PrivateTmp=yes' }}
 {{ 'User=nobody' }}
 {{ 'Group=nobody' }}
+<<<<<<< Updated upstream
 {{ 'ExecReload=/bin/kill -HUP $MAINPID' }}
 {{ 'ExecStart=' + lookup('ansible.builtin.vars', 'ssl_exporter_dest') +
   '/ssl_exporter --config.file=' + lookup('ansible.builtin.vars',
   'ssl_exporter_dest') + '/ssl_exporter.yaml' -}}
 {% if lookup('ansible.builtin.vars', 'ssl_exporter_options', default='')
   not in ['', [], '[]', None] %}
+=======
+{{ 'ExecStart=' + hostvars[inventory_hostname]['ssl_exporter_dest'] +
+  '/ssl_exporter --config.file=' +
+  hostvars[inventory_hostname]['ssl_exporter_dest'] + '/ssl_exporter.yml' -}}
+{% if vars['ssl_exporter_options'] is defined and
+  vars['ssl_exporter_options'] != '' %}
+>>>>>>> Stashed changes
 {% for s in vars['ssl_exporter_options'] %}
 {% if s['web_listen_address'] is defined and s['web_listen_address']
   not in ['', [], '[]', None] %}
