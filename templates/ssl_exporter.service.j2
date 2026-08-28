@@ -20,7 +20,7 @@
 {{ 'ProtectSystem=strict' }}
 {{ 'PrivateTmp=yes' }}
 {{ 'User=nobody' }}
-{{ 'Group=nobody' }}
+{{ 'Group=' + ('nogroup' if ansible_os_family == 'Debian' else 'nobody') }}
 {{ 'ExecReload=/bin/kill -HUP $MAINPID' }}
 {{ 'ExecStart=' + lookup('ansible.builtin.vars', 'ssl_exporter_dest') +
   '/ssl_exporter --config.file=' + lookup('ansible.builtin.vars',
