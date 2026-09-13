@@ -6,7 +6,7 @@
   not in ['', [], '[]', None] %}
 {% for s in lookup('ansible.builtin.vars', 'ssl_exporter_options') %}
 {% if loop['first'] %}
-{{ 'OPTIONS=\"' -}}
+{{ 'SSL_EXPORTER_ARGS=\"' -}}
 {% endif %}
 {% if s['web_listen_address'] is defined and s['web_listen_address']
   not in ['', [], '[]', None] %}
@@ -32,5 +32,5 @@
 {% endif %}
 {% endfor %}
 {% else %}
-{{ 'OPTIONS=\"\"' }}
+{{ 'SSL_EXPORTER_ARGS=\"\"' }}
 {% endif %}

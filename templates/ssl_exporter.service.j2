@@ -4,24 +4,32 @@
 
 {{ '[Unit]' }}
 {{ 'Description=Prometheus exporter for SSL metrics' }}
-{{ 'Documentation=https://github.com/ribbybibby/ssl_exporter' }}
-{{ 'After=network.target network-online.target basic.target' }}
-{{ 'Wants=network-online.target' }}
+{{ 'Documentation=https://github.com/piotrkochan/ssl_exporter' }}
+{{ 'After=network.target network-online.target nss-lookup.target basic.target' }}
+{{ 'Wants=network-online.target nss-lookup.target' }}
 {{ 'StartLimitIntervalSec=30' }}
 {{ 'StartLimitBurst=3' }}
 
 {{ '[Service]' }}
-{{ 'Type=simple' }}
-{{ 'Restart=on-failure' }}
-{{ 'RestartSec=30' }}
-{{ 'PrivateTmp=yes' }}
-{{ 'NoNewPrivileges=true' }}
-{{ 'ProtectHome=read-only' }}
-{{ 'ProtectSystem=strict' }}
-{{ 'PrivateTmp=yes' }}
 {{ 'User=nobody' }}
 {{ 'Group=' + ('nogroup' if ansible_os_family == 'Debian' else 'nobody') }}
+{{ 'Restart=on-failure' }}
+{{ 'RestartSec=30' }}
 {{ 'ExecReload=/bin/kill -HUP $MAINPID' }}
+{{ 'NoNewPrivileges=true' }}
+{{ 'ProtectHome=true' }}
+{{ 'ProtectSystem=strict' }}
+{{ 'ProtectHostname=true' }}
+{{ 'ProtectControlGroups=true' }}
+{{ 'ProtectKernelModules=true' }}
+{{ 'ProtectKernelTunables=true' }}
+{{ 'LockPersonality=true' }}
+{{ 'RestrictRealtime=yes' }}
+{{ 'RestrictNamespaces=yes' }}
+{{ 'MemoryDenyWriteExecute=yes' }}
+{{ 'PrivateDevices=yes' }}
+{{ 'PrivateTmp=true' }}
+{{ 'CapabilityBoundingSet=' }}
 {{ 'ExecStart=' + lookup('ansible.builtin.vars', 'ssl_exporter_dest') +
   '/ssl_exporter --config.file=' + lookup('ansible.builtin.vars',
   'ssl_exporter_dest') + '/ssl_exporter.yml' -}}
