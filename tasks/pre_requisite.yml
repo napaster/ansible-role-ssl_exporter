@@ -53,7 +53,7 @@
       default='') in ['', [], '[]', None]"
 - name: "ssl_exporter | Get last release version from Github"
   community.general.github_release:
-    user: "ribbybibby"
+    user: "piotrkochan"
     repo: "ssl_exporter"
     action: "latest_release"
   run_once: true
